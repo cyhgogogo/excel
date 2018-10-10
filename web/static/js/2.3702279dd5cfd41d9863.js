@@ -1,0 +1,2 @@
+webpackJsonp([2],{SmVd:function(e,t){},xXdY:function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var s={render:function(){var e=this.$createElement;return(this._self._c||e)("div",[this._v("\n  ssss\n")])},staticRenderFns:[]};var r=n("VU/8")({name:"setting"},s,!1,function(e){n("SmVd")},"data-v-5958e8e0",null);t.default=r.exports}});
+//# sourceMappingURL=2.3702279dd5cfd41d9863.js.map
