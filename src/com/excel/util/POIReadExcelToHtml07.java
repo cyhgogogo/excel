@@ -1,5 +1,6 @@
 package com.excel.util;
 
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -10,6 +11,7 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class POIReadExcelToHtml07 {
 
@@ -46,7 +48,7 @@ public class POIReadExcelToHtml07 {
     public static String getExcelToHtml(XSSFWorkbook wb, String sheetName) {
         try {
             String htmlPage = getExcelInfo(wb, sheetName);
-            htmlPage = "<html><head><meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\"></head><body>" + htmlPage + "</body></html>";
+            htmlPage = "<html><head><meta http-equiv=\"content-type\" content=\"text/html;charset=UTF-8\"></head><body>" + htmlPage + "</body></html>";
             return htmlPage;
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,7 +73,243 @@ public class POIReadExcelToHtml07 {
         XSSFCell cell = null;
 
         // System.out.println(sheet.getPhysicalNumberOfRows());
-        for (int rowNum = sheet.getFirstRowNum(); rowNum <= lastRowNum; rowNum++) {
+        int firstRowNum=sheet.getFirstRowNum();
+        if(lastRowNum>4)
+        {
+            CountDownLatch c=new CountDownLatch(4);
+            StringBuffer sb1=new StringBuffer();
+            StringBuffer sb2=new StringBuffer();
+            StringBuffer sb3=new StringBuffer();
+            StringBuffer sb4=new StringBuffer();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        sb1.append(getRowConcurrenInfo(wb,sheet,firstRowNum,lastRowNum/4));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    c.countDown();
+                }
+            }).start();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        sb2.append(getRowConcurrenInfo(wb,sheet,lastRowNum/4,lastRowNum/4*2));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    c.countDown();
+                }
+            }).start();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        sb3.append(getRowConcurrenInfo(wb,sheet,lastRowNum/4*2,lastRowNum/4*3));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    c.countDown();
+                }
+            }).start();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        sb4.append(getRowConcurrenInfo(wb,sheet,lastRowNum/4*3,lastRowNum));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    c.countDown();
+                }
+            }).start();
+            c.await();
+            sb.append(sb1);
+            sb.append(sb2);
+            sb.append(sb3);
+            sb.append(sb4);
+        }
+        else
+        {
+            sb.append(getRowConcurrenInfo(wb,sheet,firstRowNum,lastRowNum));
+        }
+
+
+//        for (int rowNum = sheet.getFirstRowNum(); rowNum <= lastRowNum; rowNum++) {
+//
+//            row = (XSSFRow) sheet.getRow(rowNum);
+//
+//            if (row == null) {
+//
+//                sb.append("<tr><td style='" + getNullCellBorderStyle() + "' > &nbsp;</td></tr>");
+//
+//                continue;
+//            }
+//
+//            sb.append("<tr>");
+//
+//            int lastColNum = row.getLastCellNum();
+//            CountDownLatch c=new CountDownLatch(4);
+//
+//            for (int colNum = 0; colNum < lastColNum; colNum++) {
+//
+//                cell = row.getCell(colNum);
+//                if (sheet.getSheetName().equals("T0登记表") && (colNum == 19 || colNum == 20 || colNum >= 22))
+//                    continue;
+//                if (sheet.getSheetName().equals("T3-T4") && colNum >= 29)
+//                    continue;
+//                if(sheet.getSheetName().equals("T10损益表")&&rowNum==20)
+//                    continue;
+//                if(sheet.getSheetName().equals("T3-T4")&&rowNum>=32)
+//                    continue;
+//                if (cell == null) {
+//
+//                    sb.append("<td style='" + getNullCellBorderStyle() + "'>&nbsp;</td>");
+//
+//                    continue;
+//                }
+//
+//
+//                String stringValue = getCellValue(cell,wb);
+//
+//                if (map[0].containsKey(rowNum + "," + colNum)) {
+//
+//                    String pointString = map[0].get(rowNum + "," + colNum);
+//
+//                    map[0].remove(rowNum + "," + colNum);
+//
+//                    int bottomeRow = Integer.valueOf(pointString.split(",")[0]);
+//
+//                    int bottomeCol = Integer.valueOf(pointString.split(",")[1]);
+//
+//                    int rowSpan = bottomeRow - rowNum + 1;
+//
+//                    int colSpan = bottomeCol - colNum + 1;
+//
+//                    sb.append("<td rowspan= '" + rowSpan + "' colspan= '"
+//                            + colSpan + "' ");
+//
+//                } else if (map[1].containsKey(rowNum + "," + colNum)) {
+//
+//                    map[1].remove(rowNum + "," + colNum);
+//
+//                    continue;
+//
+//                } else {
+//
+//                    sb.append("<td ");
+//                }
+//                XSSFCellStyle cellStyle =null;
+//                if(cell!=null)
+//                {
+//                    //获取样式的内容
+//
+//                    cellStyle = cell.getCellStyle();
+//
+//                }
+//
+//                if (cellStyle != null) {
+//                    short alignment = cellStyle.getAlignment();
+//                    sb.append("align='" + convertAlignToHtml(alignment) + "' ");
+//
+//                    short verticalAlignment = cellStyle.getVerticalAlignment();
+//
+//                    sb.append("valign='"
+//                            + convertVerticalAlignToHtml(verticalAlignment)
+//                            + "' ");
+//                    //---------
+//                    XSSFFont xf = cellStyle.getFont();
+//
+//                    short boldWeight = xf.getBoldweight();
+//
+//                    XSSFColor xc = xf.getXSSFColor();
+//
+//
+//                    sb.append("style='");
+//
+//                    String fontColorStr = ColorUtil.convertColorToHex(xc);
+//
+//                    int columnWidth = sheet.getColumnWidth(cell.getColumnIndex());
+//
+//                    sb.append("width:" + columnWidth + "px;");
+//
+//                    if (fontColorStr != null && !"".equals(fontColorStr.trim())) {
+//
+//                        sb.append("color:" + fontColorStr + ";"); // 字体颜色
+//                    }
+//                    XSSFColor bgColor =null;
+//                    String bgColorStr =null;
+//                    try {
+//
+//                        if (cellStyle != null) {
+//                            bgColor = cellStyle.getFillForegroundXSSFColor();
+//
+//                        }
+//                    }catch (Exception e)
+//                    {
+//                        bgColor=null;
+//                    }
+//
+//                    if(bgColor!=null)
+//                    bgColorStr = ColorUtil.convertColorToHex(bgColor);
+//
+//                    if (bgColorStr != null && !"".equals(bgColorStr.trim())) {
+//
+//                        sb.append("background-color:" + bgColorStr + ";"); // 背景颜色
+//                    }
+//
+//                    sb.append(getBorderStyle(0, cellStyle.getBorderTop(), cellStyle.getTopBorderXSSFColor()));
+//                    sb.append(getBorderStyle(1, cellStyle.getBorderRight(), cellStyle.getRightBorderXSSFColor()));
+//                    sb.append(getBorderStyle(2, cellStyle.getBorderBottom(), cellStyle.getBottomBorderXSSFColor()));
+//                    sb.append(getBorderStyle(3, cellStyle.getBorderLeft(), cellStyle.getLeftBorderXSSFColor()));
+//                    //-----------------
+//
+//
+//                    sb.append("font-weight:" + boldWeight + ";"); // 字体加粗
+//
+//                    sb.append("font-size: " + xf.getFontHeight() / 2.5 + "%;"); // 字体大小
+//
+//
+//                    sb.append("' ");
+//                }
+//
+//
+//                //end------
+//                sb.append(">");
+//
+//                if (stringValue == null || "".equals(stringValue.trim())) {
+//
+//                    sb.append(" &nbsp; ");
+//                } else {
+//
+//                    // 将ascii码为160的空格转换为html下的空格（&nbsp;）
+//                    sb.append(stringValue.replace(String.valueOf((char) 160),
+//                            "&nbsp;"));
+//
+//                }
+//
+//                sb.append("</td>");
+//
+//            }
+//
+//            sb.append("</tr>");
+//        }
+
+        sb.append("</table>");
+
+        return sb.toString();
+    }
+    public static String getRowConcurrenInfo(XSSFWorkbook wb, Sheet sheet,int startRowNum,int lastRowNum) throws Exception {
+
+        StringBuffer sb = new StringBuffer();
+
+        Map<String, String> map[] = getRowSpanColSpanMap(sheet);
+        XSSFRow row = null;
+        XSSFCell cell = null;
+        for (int rowNum = startRowNum; rowNum <= lastRowNum; rowNum++) {
 
             row = (XSSFRow) sheet.getRow(rowNum);
 
@@ -186,7 +424,7 @@ public class POIReadExcelToHtml07 {
                     }
 
                     if(bgColor!=null)
-                    bgColorStr = ColorUtil.convertColorToHex(bgColor);
+                        bgColorStr = ColorUtil.convertColorToHex(bgColor);
 
                     if (bgColorStr != null && !"".equals(bgColorStr.trim())) {
 
@@ -230,10 +468,9 @@ public class POIReadExcelToHtml07 {
             sb.append("</tr>");
         }
 
-        sb.append("</table>");
-
         return sb.toString();
     }
+
 
     @SuppressWarnings("unchecked")
     private static Map<String, String>[] getRowSpanColSpanMap(Sheet sheet) {
