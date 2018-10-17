@@ -24,7 +24,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="classes" level="project" />
-    <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="excel" level="project" />
     <orderEntry type="module-library">
       <library name="JUnit4">
@@ -37,5 +36,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="activation-1.1" level="project" />
+    <orderEntry type="library" name="lib" level="project" />
   </component>
 </module>

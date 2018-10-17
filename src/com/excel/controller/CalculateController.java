@@ -1,6 +1,5 @@
 package com.excel.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.excel.pojo.T0Register;
 import com.excel.pojo.T0_T3_T4;
 import com.excel.pojo.T3_T4;
@@ -16,7 +15,6 @@ import javax.servlet.http.HttpSession;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -106,15 +104,12 @@ public class CalculateController {
         String userName = (String) session.getAttribute("username");
         HashMap<String, Object> json = new HashMap<String, Object>();
         if (userName != null) {
-            if(t0_t3_t4!=null)
-            {
+            if (t0_t3_t4 != null) {
                 T0Register t0Register = t0_t3_t4.getT0();
                 T3_T4 t3T4 = t0_t3_t4.getT3_t4();
-                if(t0Register!=null)
-                {
-                    String[][][] loadService=t0Register.getLoadService();
-                    if(loadService!=null)
-                    {
+                if (t0Register != null) {
+                    String[][][] loadService = t0Register.getLoadService();
+                    if (loadService != null) {
                         for (int x = 0; x < loadService.length; x++) {
                             int temp = 4;
                             if (x == 0) {
@@ -122,13 +117,11 @@ public class CalculateController {
                             }
                             for (int i = 0; i < temp; i++) {
                                 for (int s = 0; s < 9; s++) {
-                                    if(!loadService[x][i][0].equals(""))
-                                    {
-                                        if(loadService[x][i][1].equals(""))
-                                        {
+                                    if (!loadService[x][i][0].equals("")) {
+                                        if (loadService[x][i][1].equals("")) {
                                             json.put("success", 0);
-                                            json.put("msg","请填上对应的期数");
-                                            return  json;
+                                            json.put("msg", "请填上对应的期数");
+                                            return json;
                                         }
                                     }
                                 }
@@ -174,4 +167,38 @@ public class CalculateController {
 
         return json;
     }
+
+    /**
+     * 返回html页面
+     * @param sheetName
+     * @param session
+     * @return
+     */
+    @RequestMapping(value = "gethtml")
+    public String getHtml(@RequestParam(value = "sheet") String sheetName,
+                          HttpSession session) {
+        HashMap<String, Object> json = new HashMap<String, Object>();
+        String userName = (String) session.getAttribute("username");
+        String content = "";
+        if (userName != null) {
+            content = saveService.getSheetHtml(userName, sheetName);
+        }
+        return content;
+    }
+
+    /**
+     * 注销
+     * @param session
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "logout")
+    public Object logout(
+            HttpSession session) {
+        HashMap<String, Object> json = new HashMap<String, Object>();
+        session.invalidate();
+        json.put("success", 1);
+        return json;
+    }
+
 }
