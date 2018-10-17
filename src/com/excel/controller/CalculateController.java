@@ -174,7 +174,7 @@ public class CalculateController {
      * @param session
      * @return
      */
-    @RequestMapping(value = "gethtml")
+    @RequestMapping(value = "gethtml",produces = "text/html;charset=UTF-8")
     public String getHtml(@RequestParam(value = "sheet") String sheetName,
                           HttpSession session) {
         HashMap<String, Object> json = new HashMap<String, Object>();
