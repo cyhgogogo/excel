@@ -43,4 +43,8 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- session过期调用的方法 -->
+    <listener>
+        <listener-class>com.excel.listener.ClearSessionListener</listener-class>
+    </listener>
 </web-app>

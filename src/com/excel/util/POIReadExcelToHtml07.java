@@ -74,68 +74,8 @@ public class POIReadExcelToHtml07 {
 
         // System.out.println(sheet.getPhysicalNumberOfRows());
         int firstRowNum=sheet.getFirstRowNum();
-        if(lastRowNum>4)
-        {
-            CountDownLatch c=new CountDownLatch(4);
-            StringBuffer sb1=new StringBuffer();
-            StringBuffer sb2=new StringBuffer();
-            StringBuffer sb3=new StringBuffer();
-            StringBuffer sb4=new StringBuffer();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        sb1.append(getRowConcurrenInfo(wb,sheet,firstRowNum,lastRowNum/4));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    c.countDown();
-                }
-            }).start();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        sb2.append(getRowConcurrenInfo(wb,sheet,lastRowNum/4,lastRowNum/4*2));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    c.countDown();
-                }
-            }).start();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        sb3.append(getRowConcurrenInfo(wb,sheet,lastRowNum/4*2,lastRowNum/4*3));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    c.countDown();
-                }
-            }).start();
+        sb.append(getRowConcurrenInfo(wb,sheet,firstRowNum,lastRowNum));
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        sb4.append(getRowConcurrenInfo(wb,sheet,lastRowNum/4*3,lastRowNum));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    c.countDown();
-                }
-            }).start();
-            c.await();
-            sb.append(sb1);
-            sb.append(sb2);
-            sb.append(sb3);
-            sb.append(sb4);
-        }
-        else
-        {
-            sb.append(getRowConcurrenInfo(wb,sheet,firstRowNum,lastRowNum));
-        }
 
 
 //        for (int rowNum = sheet.getFirstRowNum(); rowNum <= lastRowNum; rowNum++) {

@@ -1,9 +1,7 @@
 package com.excel.controller;
 
-import com.excel.pojo.T0Register;
-import com.excel.pojo.T0_T3_T4;
-import com.excel.pojo.T3_T4;
-import com.excel.pojo.UserInfo;
+
+import com.excel.pojo.*;
 import com.excel.service.SaveService;
 import com.excel.service.UserInfoService;
 import org.slf4j.Logger;
@@ -25,6 +23,7 @@ public class CalculateController {
     @Autowired
     UserInfoService userInfoService;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
     @ResponseBody
     @RequestMapping(value = "register", method = RequestMethod.POST)
@@ -82,6 +81,17 @@ public class CalculateController {
             json.put("msg", "管理员未开放登录");
         } else if (user != null) {
             if (user.getPassword().equals(password)) {
+                //不存在，首次登陆，放入Map
+                if (!MemoryData.getSessionIDMap().containsKey(user.getUserName())) {
+                    MemoryData.getSessionIDMap().put(user.getUserName(), session.getId());
+                }
+
+                //判断sessionid是否一致，不一致则更新
+                else if (MemoryData.getSessionIDMap().containsKey(user.getUserName())
+                        && !session.getId().equals(MemoryData.getSessionIDMap().get(user.getUserName()))) {
+                    MemoryData.getSessionIDMap().remove(user.getUserName());
+                    MemoryData.getSessionIDMap().put(user.getUserName(), session.getId());
+                }
                 session.setAttribute("username", userName);
                 json.put("success", 1);
                 json.put("msg", "登陆成功！");
@@ -93,6 +103,8 @@ public class CalculateController {
             json.put("success", 0);
             json.put("msg", "该用户未注册");
         }
+
+
         return json;
     }
 
@@ -170,11 +182,12 @@ public class CalculateController {
 
     /**
      * 返回html页面
+     *
      * @param sheetName
      * @param session
      * @return
      */
-    @RequestMapping(value = "gethtml",produces = "text/html;charset=UTF-8")
+    @RequestMapping(value = "gethtml", produces = "text/html;charset=UTF-8", method = RequestMethod.POST)
     public String getHtml(@RequestParam(value = "sheet") String sheetName,
                           HttpSession session) {
         HashMap<String, Object> json = new HashMap<String, Object>();
@@ -188,6 +201,7 @@ public class CalculateController {
 
     /**
      * 注销
+     *
      * @param session
      * @return
      */
@@ -195,6 +209,14 @@ public class CalculateController {
     @RequestMapping(value = "logout")
     public Object logout(
             HttpSession session) {
+        String userName= (String) session.getAttribute("username");
+        if(userName!=null)
+        {
+            if(MemoryData.getSessionIDMap().get(userName)!=null)
+            {
+                MemoryData.getSessionIDMap().remove(userName);
+            }
+        }
         HashMap<String, Object> json = new HashMap<String, Object>();
         session.invalidate();
         json.put("success", 1);

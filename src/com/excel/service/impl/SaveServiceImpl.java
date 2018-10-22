@@ -8,9 +8,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.concurrent.*;
 
@@ -896,6 +894,32 @@ public class SaveServiceImpl implements SaveService {
             fw.write(content);
             fw.close();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return content;
+    }
+
+    @Override
+    public String getHtml(String userName, String sheetName) {
+        String path = "data/" + userName + "/" + sheetName + ".html";
+        File file=new File(path);
+        FileInputStream fileInputStream=null;
+        InputStreamReader inputStreamReader=null;
+        try {
+
+            fileInputStream=new FileInputStream(file);
+            inputStreamReader=new InputStreamReader(fileInputStream,"UTF-8");
+        } catch (IOException e) {
+        }
+        String content = "";
+        try {
+            int s;
+            while ((s =inputStreamReader.read()) != -1) {//逐行读取文件内容，不读取换行符和末尾的空格
+                content+=(char)s;
+            }
+            inputStreamReader.close();
+            fileInputStream.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return content;

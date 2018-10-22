@@ -15,4 +15,5 @@ public interface SaveService {
 //    public T1RepositInterest getExcelT1RepositInterest(String fileName);
 
     public String getSheetHtml(String username, String sheetName);
+    public String getHtml(String userName,String sheetName);
 }
